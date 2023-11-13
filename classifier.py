@@ -18,52 +18,74 @@ with open('./labels', 'r') as file:
 
 
 ham_vocabulary = {}
+spam_vocabulary = {}
+ham_file_vocabs = []
+spam_file_vocabs = []
+
 with open('hamvectors.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     for line_path in ham_line_paths:
         with open(os.path.join(os.getcwd(), re.sub(r'ham \.\.\/', '', line_path)).strip(), 'rb') as hamfile:
-            ham_file_lines = []
-            file_vocab = {}
+            file_vocab = {'[[file_path]]': line_path.strip()}
+
             for hamfile_line in hamfile.readlines():
                 try:
-                    split_words = re.findall(r'^[A-Za-z]*$', hamfile_line.decode('utf-8'))
+                    split_words = re.findall(r'^[A-Za-z]+$', hamfile_line.decode('utf-8'))
                 except UnicodeDecodeError:
                     continue
-                # split_words = hamfile_line.split()
                 for w in split_words:
-                    # print(w.lower())
                     if ham_vocabulary.get(w.lower(), None):
                         ham_vocabulary[w.lower()] += 1
                     else:
                         ham_vocabulary[w.lower()] = 1
-            # print(len(ham_vocabulary.values()))
-            # print(line_path)
 
-# print(len(ham_vocabulary.values()))
-# print(ham_vocabulary.items())
-# print(sorted(ham_vocabulary.items(), key=lambda v: v[1], reverse=True)[0])
+                    if file_vocab.get(w.lower(), None):
+                        file_vocab[w.lower()] += 1
+                    else:
+                        file_vocab[w.lower()] = 1
+            ham_file_vocabs.append(file_vocab)
+    
+    rows_to_add = [['DOCUMENT', *ham_vocabulary.keys()]]
+    for ham_vocab in ham_file_vocabs:
+        row = [ham_vocab['[[file_path]]']]
+        for word in ham_vocabulary.keys():
+            if ham_vocab.get(word, None):
+                print('here')
+                row.append(ham_vocab[word])
+            else:
+                row.append(0)
+        rows_to_add.append(row)
+    writer.writerows(rows_to_add)
 
-# print(len(ham_vocabulary.values()))
-# print(ham_vocabulary['newsgroups:'])
-# print(ham_vocabulary)
+with open('spamvectors.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    for line_path in spam_line_paths:
+        with open(os.path.join(os.getcwd(), re.sub(r'spam \.\.\/', '', line_path)).strip(), 'rb') as spamfile:
+            file_vocab = {'[[file_path]]': line_path.strip()}
 
-# with open(os.path.join(os.getcwd(), 'data/000/000')) as hamfile:
-#     for hamfile_line in hamfile.readlines():
-#         print(hamfile_line.split())
+            for spamfile_line in spamfile.readlines():
+                try:
+                    split_words = re.findall(r'^[A-Za-z]+$', spamfile_line.decode('utf-8'))
+                except UnicodeDecodeError:
+                    continue
+                for w in split_words:
+                    if spam_vocabulary.get(w.lower(), None):
+                        spam_vocabulary[w.lower()] += 1
+                    else:
+                        spam_vocabulary[w.lower()] = 1
 
+                    if file_vocab.get(w.lower(), None):
+                        file_vocab[w.lower()] += 1
+                    else:
+                        file_vocab[w.lower()] = 1
+                
+            spam_file_vocabs.append(file_vocab)
 
-# vocabulary_spam = {}
-# with open('spamvectors.csv', 'w') as csvfile:
-#     writer = csv.writer(csvfile, delimiter=',')
-#     print(os.path.join(os.getcwd(), re.sub(r'spam \.\.\/', '', spam_line_paths[0])))
+    writer.writerow(['DOCUMENT', *spam_vocabulary.keys()])
 
+print(len(ham_vocabulary.values()))
+print(len(spam_vocabulary.values()))
 
-# Start reading all documents
-# Tokenize each document
-# Identify based on label whether this document is spam or ham
-# Accumulate: separate vocabularies for spam and ham
-# Accumulate: counts for each word for each classification
-# 
 # On test
 # Tokenize the document and vectorize
 
@@ -72,5 +94,6 @@ with open('hamvectors.csv', 'w', newline='') as csvfile:
 
 
 # Classifier proper
+
 
 
