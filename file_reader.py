@@ -139,6 +139,9 @@ for item in ham_test:
         print('HAM!')
     elif spam_probability > ham_probability:
         print('SPAM!')
+    
+    print(ham_probability)
+    print(spam_probability)
 
 
 for item in spam_test:
@@ -153,3 +156,6 @@ for item in spam_test:
         print('HAM!')
     else spam_probability > ham_probability:
         print('SPAM!')
+    
+    print(ham_probability)
+    print(spam_probability)
